@@ -6,6 +6,7 @@ import {loadBookCatalog} from '../services/catalog';
 import {LibraryBook, ReadingStatus} from '../types/book';
 
 type ViewMode = 'grid' | 'list';
+type LibraryFilter = 'all' | 'reading';
 type ScreenState = 'loading' | 'ready' | 'error';
 
 const statusLabels: Record<ReadingStatus, string> = {
@@ -46,6 +47,13 @@ function ReadingStatusBadge({status}: {status: ReadingStatus}) {
   );
 }
 
+function formatLastReadAt(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return `Đọc gần nhất ${date.toLocaleDateString('vi-VN')}`;
+}
+
 function BookCard({book, mode}: {book: LibraryBook; mode: ViewMode}) {
   const isList = mode === 'list';
   return (
@@ -64,6 +72,7 @@ function BookCard({book, mode}: {book: LibraryBook; mode: ViewMode}) {
             <Text style={styles.progressText}>
               Trang {book.currentPage}/{book.totalPages} - {book.completionPercent}%
             </Text>
+            {book.lastReadAt && <Text style={styles.lastReadText}>{formatLastReadAt(book.lastReadAt)}</Text>}
           </View>
         )}
       </View>
@@ -76,6 +85,10 @@ function HomeScreen() {
   const [catalogIssues, setCatalogIssues] = useState<string[]>([]);
   const [screenState, setScreenState] = useState<ScreenState>('loading');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [libraryFilter, setLibraryFilter] = useState<LibraryFilter>('all');
+
+  const readingBooks = books.filter(book => book.currentPage > 0);
+  const visibleBooks = libraryFilter === 'reading' ? readingBooks : books;
 
   const refreshCatalog = useCallback(async () => {
     setScreenState('loading');
@@ -143,6 +156,26 @@ function HomeScreen() {
         </Pressable>
       </View>
 
+      <View style={styles.filterBar}>
+        <Text style={styles.toolbarLabel}>Thư viện</Text>
+        <View style={styles.filterSwitcher}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{selected: libraryFilter === 'all'}}
+            onPress={() => setLibraryFilter('all')}
+            style={[styles.filterButton, libraryFilter === 'all' && styles.filterButtonActive]}>
+            <Text style={[styles.filterButtonText, libraryFilter === 'all' && styles.filterButtonTextActive]}>Tất cả ({books.length})</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{selected: libraryFilter === 'reading'}}
+            onPress={() => setLibraryFilter('reading')}
+            style={[styles.filterButton, libraryFilter === 'reading' && styles.filterButtonActive]}>
+            <Text style={[styles.filterButtonText, libraryFilter === 'reading' && styles.filterButtonTextActive]}>Đang đọc ({readingBooks.length})</Text>
+          </Pressable>
+        </View>
+      </View>
+
       <View style={styles.toolbar}>
         <Text style={styles.toolbarLabel}>Hiển thị</Text>
         <View style={styles.viewSwitcher}>
@@ -173,13 +206,13 @@ function HomeScreen() {
 
       <FlatList
         key={viewMode}
-        data={books}
+        data={visibleBooks}
         keyExtractor={book => book.id}
         numColumns={viewMode === 'grid' ? 2 : 1}
         renderItem={({item}) => <BookCard book={item} mode={viewMode}/>}
-        contentContainerStyle={[styles.bookList, books.length === 0 && styles.emptyBookList]}
+        contentContainerStyle={[styles.bookList, visibleBooks.length === 0 && styles.emptyBookList]}
         columnWrapperStyle={viewMode === 'grid' ? styles.gridRow : undefined}
-        ListEmptyComponent={<Text style={styles.emptyText}>Chưa có sách hợp lệ trong thư viện.</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>{libraryFilter === 'reading' ? 'Chưa có sách đang đọc.' : 'Chưa có sách hợp lệ trong thư viện.'}</Text>}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -201,7 +234,13 @@ const styles = StyleSheet.create({
   refreshButton: {borderColor: '#C6D5E7', borderRadius: 9, borderWidth: 1, marginTop: 8, paddingHorizontal: 11, paddingVertical: 8},
   refreshButtonText: {color: '#214F8C', fontSize: 13, fontWeight: '700'},
   toolbar: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14},
+  filterBar: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 10},
   toolbarLabel: {color: '#526276', fontSize: 14, fontWeight: '600'},
+  filterSwitcher: {backgroundColor: '#E9EEF5', borderRadius: 9, flexDirection: 'row', padding: 3},
+  filterButton: {borderRadius: 7, paddingHorizontal: 9, paddingVertical: 7},
+  filterButtonActive: {backgroundColor: '#FFFFFF', elevation: 1, shadowColor: '#172A45', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.08, shadowRadius: 2},
+  filterButtonText: {color: '#6B7A90', fontSize: 12, fontWeight: '700'},
+  filterButtonTextActive: {color: '#214F8C'},
   viewSwitcher: {backgroundColor: '#E9EEF5', borderRadius: 9, flexDirection: 'row', padding: 3},
   switchButton: {borderRadius: 7, paddingHorizontal: 12, paddingVertical: 7},
   switchButtonActive: {backgroundColor: '#FFFFFF', elevation: 1, shadowColor: '#172A45', shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.08, shadowRadius: 2},
@@ -233,6 +272,7 @@ const styles = StyleSheet.create({
   progressTrack: {backgroundColor: '#E7ECF3', borderRadius: 99, height: 5, overflow: 'hidden'},
   progressFill: {backgroundColor: '#2E8C6C', borderRadius: 99, height: '100%'},
   progressText: {color: '#6B7A90', fontSize: 10, marginTop: 5},
+  lastReadText: {color: '#8A97A8', fontSize: 10, marginTop: 4},
   emptyText: {color: '#6B7A90', fontSize: 15, textAlign: 'center'},
 });
 

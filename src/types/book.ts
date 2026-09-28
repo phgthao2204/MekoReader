@@ -32,6 +32,7 @@ export interface LibraryBook extends BookCatalogEntry {
   currentPage: number;
   completionPercent: number;
   readingStatus: ReadingStatus;
+  lastReadAt?: string;
 }
 
 export interface CatalogIssue {

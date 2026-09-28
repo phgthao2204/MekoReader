@@ -40,7 +40,7 @@ function combineReadingState(book: BookCatalogEntry, readingState?: ReadingState
   const currentPage = Math.min(Math.max(readingState?.currentPage ?? 0, 0), book.totalPages);
   const completionPercent = Math.round((currentPage / book.totalPages) * 100);
   const readingStatus = currentPage === 0 ? 'notStarted' : currentPage === book.totalPages ? 'completed' : 'reading';
-  return {...book, currentPage, completionPercent, readingStatus};
+  return {...book, currentPage, completionPercent, readingStatus, lastReadAt: readingState?.lastReadAt};
 }
 
 export async function loadBookCatalog(): Promise<CatalogLoadResult> {
