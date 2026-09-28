@@ -17,7 +17,7 @@ function AppNavigator() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{title: 'MekoReader'}}
+          options={{headerShown: false}}
         />
       </Stack.Navigator>
     </NavigationContainer>
