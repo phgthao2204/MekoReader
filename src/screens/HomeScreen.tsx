@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, Pressable, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, FlatList, Pressable, StatusBar, StyleSheet, Text, TextInput, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {loadBookCatalog} from '../services/catalog';
@@ -86,9 +86,14 @@ function HomeScreen() {
   const [screenState, setScreenState] = useState<ScreenState>('loading');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [libraryFilter, setLibraryFilter] = useState<LibraryFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const readingBooks = books.filter(book => book.currentPage > 0);
-  const visibleBooks = libraryFilter === 'reading' ? readingBooks : books;
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase('vi-VN');
+  const matchedBooks = normalizedQuery.length === 0
+    ? books
+    : books.filter(book => [book.title, book.author, book.category].some(value => value.toLocaleLowerCase('vi-VN').includes(normalizedQuery)));
+  const readingBooks = matchedBooks.filter(book => book.currentPage > 0);
+  const visibleBooks = libraryFilter === 'reading' ? readingBooks : matchedBooks;
 
   const refreshCatalog = useCallback(async () => {
     setScreenState('loading');
@@ -156,6 +161,23 @@ function HomeScreen() {
         </Pressable>
       </View>
 
+      <View style={styles.searchBox}>
+        <TextInput
+          accessibilityLabel="Tìm kiếm sách"
+          autoCapitalize="none"
+          onChangeText={setSearchQuery}
+          placeholder="Tìm theo tên, tác giả hoặc thể loại"
+          placeholderTextColor="#8A97A8"
+          style={styles.searchInput}
+          value={searchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <Pressable accessibilityRole="button" accessibilityLabel="Xóa tìm kiếm" onPress={() => setSearchQuery('')} style={styles.clearSearchButton}>
+            <Text style={styles.clearSearchText}>×</Text>
+          </Pressable>
+        )}
+      </View>
+
       <View style={styles.filterBar}>
         <Text style={styles.toolbarLabel}>Thư viện</Text>
         <View style={styles.filterSwitcher}>
@@ -164,7 +186,7 @@ function HomeScreen() {
             accessibilityState={{selected: libraryFilter === 'all'}}
             onPress={() => setLibraryFilter('all')}
             style={[styles.filterButton, libraryFilter === 'all' && styles.filterButtonActive]}>
-            <Text style={[styles.filterButtonText, libraryFilter === 'all' && styles.filterButtonTextActive]}>Tất cả ({books.length})</Text>
+            <Text style={[styles.filterButtonText, libraryFilter === 'all' && styles.filterButtonTextActive]}>Tất cả ({matchedBooks.length})</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -233,6 +255,10 @@ const styles = StyleSheet.create({
   subheading: {color: '#6B7A90', fontSize: 14, marginTop: 4},
   refreshButton: {borderColor: '#C6D5E7', borderRadius: 9, borderWidth: 1, marginTop: 8, paddingHorizontal: 11, paddingVertical: 8},
   refreshButtonText: {color: '#214F8C', fontSize: 13, fontWeight: '700'},
+  searchBox: {backgroundColor: '#FFFFFF', borderColor: '#D9E2EE', borderRadius: 11, borderWidth: 1, flexDirection: 'row', marginHorizontal: 20, marginBottom: 14, paddingLeft: 13},
+  searchInput: {color: '#1C2B3E', flex: 1, fontSize: 14, minHeight: 44, paddingHorizontal: 0},
+  clearSearchButton: {alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14},
+  clearSearchText: {color: '#6B7A90', fontSize: 24, lineHeight: 24},
   toolbar: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14},
   filterBar: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 10},
   toolbarLabel: {color: '#526276', fontSize: 14, fontWeight: '600'},
