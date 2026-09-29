@@ -1,4 +1,7 @@
 {
-  "name": "MekoReader",
-  "displayName": "MekoReader"
+  "expo": {
+    "name": "MekoReader",
+    "slug": "mekoreader",
+    "version": "1.0.0"
+  }
 }
