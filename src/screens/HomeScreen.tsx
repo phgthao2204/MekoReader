@@ -1,7 +1,9 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {ActivityIndicator, FlatList, Pressable, StatusBar, StyleSheet, Text, TextInput, View} from 'react-native';
+import {StackScreenProps} from '@react-navigation/stack';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {RootStackParamList} from '../navigation/AppNavigator';
 import {loadBookCatalog} from '../services/catalog';
 import {LibraryBook, ReadingStatus} from '../types/book';
 
@@ -54,10 +56,15 @@ function formatLastReadAt(value?: string) {
   return `Đọc gần nhất ${date.toLocaleDateString('vi-VN')}`;
 }
 
-function BookCard({book, mode}: {book: LibraryBook; mode: ViewMode}) {
+function BookCard({book, mode, onPress}: {book: LibraryBook; mode: ViewMode; onPress: () => void}) {
   const isList = mode === 'list';
   return (
-    <View style={[styles.bookCard, isList ? styles.listCard : styles.gridCard]}>
+    <Pressable
+      accessibilityHint="Mở màn hình chi tiết sách"
+      accessibilityLabel={`${book.title}, ${book.author}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({pressed}) => [styles.bookCard, isList ? styles.listCard : styles.gridCard, pressed && styles.bookCardPressed]}>
       <BookCover book={book} compact={isList} />
       <View style={[styles.bookDetails, isList && styles.listBookDetails]}>
         <ReadingStatusBadge status={book.readingStatus} />
@@ -76,11 +83,13 @@ function BookCard({book, mode}: {book: LibraryBook; mode: ViewMode}) {
           </View>
         )}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
-function HomeScreen() {
+type Props = StackScreenProps<RootStackParamList, 'Home'>;
+
+function HomeScreen({navigation}: Props) {
   const [books, setBooks] = useState<LibraryBook[]>([]);
   const [catalogIssues, setCatalogIssues] = useState<string[]>([]);
   const [screenState, setScreenState] = useState<ScreenState>('loading');
@@ -231,7 +240,13 @@ function HomeScreen() {
         data={visibleBooks}
         keyExtractor={book => book.id}
         numColumns={viewMode === 'grid' ? 2 : 1}
-        renderItem={({item}) => <BookCard book={item} mode={viewMode}/>}
+        renderItem={({item}) => (
+          <BookCard
+            book={item}
+            mode={viewMode}
+            onPress={() => navigation.navigate('BookDetail', {book: item})}
+          />
+        )}
         contentContainerStyle={[styles.bookList, visibleBooks.length === 0 && styles.emptyBookList]}
         columnWrapperStyle={viewMode === 'grid' ? styles.gridRow : undefined}
         ListEmptyComponent={<Text style={styles.emptyText}>{libraryFilter === 'reading' ? 'Chưa có sách đang đọc.' : 'Chưa có sách hợp lệ trong thư viện.'}</Text>}
@@ -278,6 +293,7 @@ const styles = StyleSheet.create({
   emptyBookList: {flexGrow: 1, justifyContent: 'center'},
   gridRow: {gap: 14, justifyContent: 'space-between'},
   bookCard: {backgroundColor: '#FFFFFF', borderColor: '#E6EBF2', borderRadius: 14, borderWidth: 1, marginBottom: 14, overflow: 'hidden'},
+  bookCardPressed: {opacity: 0.78, transform: [{scale: 0.985}]},
   gridCard: {flex: 1, maxWidth: '48%'},
   listCard: {flexDirection: 'row', minHeight: 154, padding: 10},
   cover: {aspectRatio: 0.68, justifyContent: 'space-between', minHeight: 190, padding: 14},
