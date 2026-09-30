@@ -1,3 +1,4 @@
 module.exports = {
-  preset: '@react-native/jest-preset',
+  preset: 'jest-expo',
+  setupFiles: ['react-native-gesture-handler/jestSetup.js'],
 };
