@@ -4,12 +4,14 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import HomeScreen from '../screens/HomeScreen';
 import BookDetailScreen from '../screens/BookDetailScreen';
+import BookLoadingScreen from '../screens/BookLoadingScreen';
 import ReaderScreen from '../screens/ReaderScreen';
 import {LibraryBook} from '../types/book';
 
 export type RootStackParamList = {
   Home: undefined;
   BookDetail: {book: LibraryBook};
+  BookLoading: {book: LibraryBook};
   Reader: {book: LibraryBook};
 };
 
@@ -28,6 +30,11 @@ function AppNavigator() {
           name="BookDetail"
           component={BookDetailScreen}
           options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="BookLoading"
+          component={BookLoadingScreen}
+          options={{headerShown: false, gestureEnabled: false}}
         />
         <Stack.Screen
           name="Reader"

@@ -69,7 +69,7 @@ function BookDetailScreen({navigation, route}: Props) {
       </ScrollView>
 
       <View style={styles.actionBar}>
-        <Pressable accessibilityRole="button" onPress={() => navigation.navigate('Reader', {book})} style={({pressed}) => [styles.readButton, pressed && styles.readButtonPressed]}>
+        <Pressable accessibilityRole="button" onPress={() => navigation.navigate('BookLoading', {book})} style={({pressed}) => [styles.readButton, pressed && styles.readButtonPressed]}>
           <Text style={styles.readButtonText}>{actionLabel}</Text>
         </Pressable>
       </View>
