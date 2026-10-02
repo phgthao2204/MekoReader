@@ -13,6 +13,9 @@ function createPage(book: LibraryBook, pageNumber: number) {
   const chapter = book.tableOfContents.find(entry => entry.page === pageNumber);
   const isCover = pageNumber === 1;
   const title = isCover ? book.title : chapter?.title ?? `Trang ${pageNumber}`;
+  const imageUrl = book.documentType === 'images'
+    ? `${book.filePath.replace(/\/$/, '')}/${pageNumber}.jpg`
+    : '';
   const body = isCover
     ? book.description
     : chapter
@@ -23,9 +26,11 @@ function createPage(book: LibraryBook, pageNumber: number) {
       <div class="paper ${isCover ? 'cover-page' : ''}" style="--accent:${escapeHtml(book.coverColor)}">
         <div class="page-kicker">${isCover ? escapeHtml(book.category) : escapeHtml(book.title)}</div>
         <div class="page-content">
-          <h1>${escapeHtml(title)}</h1>
-          <p>${escapeHtml(body)}</p>
-          ${isCover ? `<div class="author">${escapeHtml(book.author)}</div>` : ''}
+          ${book.documentType === 'images'
+            ? `<img class="page-image" src="${escapeHtml(imageUrl)}" loading="lazy" alt="Trang ${pageNumber}" />`
+            : `<h1>${escapeHtml(title)}</h1>
+               <p>${escapeHtml(body)}</p>
+               ${isCover ? `<div class="author">${escapeHtml(book.author)}</div>` : ''}`}
         </div>
         <div class="page-footer"><span>MEKOREADER</span><span>${pageNumber}</span></div>
       </div>
@@ -45,6 +50,7 @@ export function createFlipbookHtml(book: LibraryBook) {
     body{display:flex;align-items:center;justify-content:center;padding:18px}.book-shell{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
     #book{margin:auto}.page{background:#f7f0df;color:#243047;overflow:hidden}.paper{height:100%;padding:28px 25px 20px;display:flex;flex-direction:column;background:linear-gradient(90deg,rgba(0,0,0,.07),transparent 8%),#fffdf7;border:1px solid rgba(22,34,55,.1)}
     .cover-page{color:#fff;background:linear-gradient(145deg,var(--accent),#14243b)}.page-kicker{font-size:10px;font-weight:800;letter-spacing:1.2px;opacity:.7;text-transform:uppercase}.page-content{display:flex;flex:1;flex-direction:column;justify-content:center}
+    .page-content{min-height:0}.page-image{width:100%;height:100%;display:block;object-fit:contain;background:#fff}
     h1{font-size:25px;line-height:1.18;margin:0 0 18px}p{font-family:Georgia,serif;font-size:14px;line-height:1.65;margin:0;opacity:.86}.author{font-size:12px;font-weight:700;margin-top:24px;opacity:.8}
     .page-footer{display:flex;font-size:9px;font-weight:700;justify-content:space-between;letter-spacing:.8px;opacity:.5}.loading{color:#d9e4f1;font-size:13px;text-align:center}.error{color:#ffd7d7;max-width:320px;text-align:center;line-height:1.5}
   </style>

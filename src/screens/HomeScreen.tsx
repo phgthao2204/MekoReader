@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {ActivityIndicator, FlatList, Pressable, StatusBar, StyleSheet, Text, TextInput, View} from 'react-native';
+import {ActivityIndicator, FlatList, Image, Pressable, StatusBar, StyleSheet, Text, TextInput, View} from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
@@ -24,8 +24,10 @@ const statusStyles: Record<ReadingStatus, {backgroundColor: string; color: strin
 };
 
 function BookCover({book, compact = false}: {book: LibraryBook; compact?: boolean}) {
+  const hasRemoteCover = /^https?:\/\//i.test(book.coverImage);
   return (
     <View style={[styles.cover, compact && styles.compactCover, {backgroundColor: book.coverColor}]}>
+      {hasRemoteCover && <Image resizeMode="cover" source={{uri: book.coverImage}} style={styles.coverImage} />}
       <Text style={styles.documentType}>{book.documentType === 'pdf' ? 'PDF' : 'ẢNH'}</Text>
       <View>
         <Text numberOfLines={compact ? 3 : 4} style={[styles.coverTitle, compact && styles.compactCoverTitle]}>
@@ -297,6 +299,7 @@ const styles = StyleSheet.create({
   gridCard: {flex: 1, maxWidth: '48%'},
   listCard: {flexDirection: 'row', minHeight: 154, padding: 10},
   cover: {aspectRatio: 0.68, justifyContent: 'space-between', minHeight: 190, padding: 14},
+  coverImage: {bottom: 0, left: 0, position: 'absolute', right: 0, top: 0},
   compactCover: {alignSelf: 'stretch', minHeight: undefined, width: 88},
   documentType: {color: 'rgba(255,255,255,0.82)', fontSize: 10, fontWeight: '800', letterSpacing: 0.8},
   coverTitle: {color: '#FFFFFF', fontSize: 19, fontWeight: '800', letterSpacing: -0.3, lineHeight: 23},

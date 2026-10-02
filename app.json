@@ -2,6 +2,15 @@
   "expo": {
     "name": "MekoReader",
     "slug": "mekoreader",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "android": {
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mekobook.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b34f9a29-b5ba-4c22-ab8f-2e1aa69cca23"
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, View} from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
@@ -10,6 +10,7 @@ type Props = StackScreenProps<RootStackParamList, 'BookDetail'>;
 function BookDetailScreen({navigation, route}: Props) {
   const {book} = route.params;
   const actionLabel = book.currentPage > 0 ? `Đọc tiếp từ trang ${book.currentPage}` : 'Bắt đầu đọc';
+  const hasRemoteCover = /^https?:\/\//i.test(book.coverImage);
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -24,6 +25,7 @@ function BookDetailScreen({navigation, route}: Props) {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={[styles.cover, {backgroundColor: book.coverColor}]}>
+          {hasRemoteCover && <Image resizeMode="cover" source={{uri: book.coverImage}} style={styles.coverImage} />}
           <Text style={styles.documentType}>{book.documentType === 'pdf' ? 'PDF' : 'PAGE ASSETS'}</Text>
           <View>
             <Text style={styles.coverTitle}>{book.title}</Text>
@@ -95,6 +97,7 @@ const styles = StyleSheet.create({
   topBarSpacer: {width: 40},
   content: {alignItems: 'center', paddingBottom: 120, paddingHorizontal: 22, paddingTop: 12},
   cover: {borderRadius: 18, elevation: 7, height: 310, justifyContent: 'space-between', padding: 22, shadowColor: '#172A45', shadowOffset: {height: 8, width: 0}, shadowOpacity: 0.22, shadowRadius: 14, width: 210},
+  coverImage: {borderRadius: 18, bottom: 0, left: 0, position: 'absolute', right: 0, top: 0},
   documentType: {color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '800', letterSpacing: 1},
   coverTitle: {color: '#FFFFFF', fontSize: 26, fontWeight: '900', lineHeight: 31},
   coverAuthor: {color: 'rgba(255,255,255,0.8)', fontSize: 13, marginTop: 9},

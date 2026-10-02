@@ -27,6 +27,10 @@
     "react-native-webview": "13.16.1"
   },
   "devDependencies": {
+    "@react-native-community/cli": "^20.1.0",
+    "@react-native-community/cli-platform-android": "^20.1.0",
+    "@react-native-community/cli-platform-ios": "^20.1.0",
+    "@react-native/metro-config": "^0.86.3",
     "@types/jest": "^29.5.13",
     "@types/react": "~19.2.2",
     "@types/react-test-renderer": "^19.1.0",
